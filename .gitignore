@@ -1,3 +1,6 @@
+# The SQLite3 database needs not to track
+*.db
+
 # Logs
 logs
 *.log
