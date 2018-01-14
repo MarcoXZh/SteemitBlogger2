@@ -1,6 +1,6 @@
 {
   "name": "steemitblogger2",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "description": "The blogger bot to mining data and publish to steemit blogs",
   "main": "index.js",
   "scripts": {

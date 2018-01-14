@@ -1,7 +1,7 @@
 /**
- * Blogger 1: dig information from a web page
+ * bloggerPromisingCC: priomissing cryptocurrencies
  * @author:  MarcoXZh3
- * @version: 0.0.1
+ * @version: 0.1.0
  */
 const cheerio = require('cheerio')
 const fs = require('fs');
@@ -29,7 +29,7 @@ module.exports = function(parentOptions, callback) {
                 throw err;
             } // if (err)
             options.db.run(
-                `CREATE TABLE IF NOT EXISTS blogs (
+                `CREATE TABLE IF NOT EXISTS BloggerPromisingCC (
                     created     INTEGER,
                     author      TEXT,
                     title       TEXT,
@@ -47,7 +47,7 @@ module.exports = function(parentOptions, callback) {
 
 
 /**
- * Run the job of blogger1
+ * Run the job of the blogger
  * @param {json}        options     settings for the job
  * @param {function}    callback    (optional) the callback function
  */
@@ -62,7 +62,7 @@ var runJob = function(options, callback) {
         }); // res.on('data', function(data) { ... });
         res.on('end', function() {
             const $ = cheerio.load(html);
-            console.log(new Date().toISOString(), 'Blogger1', 'DOM retrieved');
+            console.log(new Date().toISOString(), 'bloggerPromisingCC', 'DOM retrieved');
 
             // Grab target information from DOM
             retrieve(options, $, callback);
@@ -78,14 +78,20 @@ var runJob = function(options, callback) {
  * @param {function}    callback    (optional) the callback function
  */
 var retrieve = function(options, $, callback) {
-    var data = {};
-    data.title = $('title').text();
-    // TODO: 1 retrieve target data from DOM
-
-
-
-
-    console.log(new Date().toISOString(), 'Blogger1', 'data analyzed');
+    var names     = $('.currency-name-container').map( (i,e)=>e.children[0].data );
+    var prices    = $('.price')                  .map( (i,e)=>e.children[0].data );
+    var oneDay    = $('.percent-24h')            .map( (i,e)=>e.children[0].data );
+    var sevenDays = $('.percent-7d')             .map( (i,e)=>e.children[0].data );
+    var data = [];
+    for (var i = 0; i < options.limit.value; i++) {
+        data.push([
+            i + 1,          // index
+            names[i],       // name
+            prices[i],      // price,
+            oneDay[i],      // oneDay
+            sevenDays[i]    // sevenDays
+        ]); // data.push({ ... });
+    } // for (var i = 0; i < options.limit.value; i++)
 
     // Prepare the blog text using the data
     prepareBlog(options, data, callback);
@@ -104,19 +110,26 @@ var prepareBlog = function(options, data, callback) {
         if (err) {
             throw err;
         } // if (err)
+
+        // Prepare data
+        var str = data.map(function(e) {
+            return '| ' + e.join(' | ') + ' |';
+        }).join('\n'); // var str = data.map( ... ).join('\n');
+
+        // Prepre the blog
         var blog = {
             author:         options.author.name,
-            title:          options.title,
-            json_metadata:  options.json_metadata
+            title:          options.title
+                                   .replace(/\$LIMIT\.en/g, options.limit.en)
+                                   .replace(/\$LIMIT\.zh/g, options.limit.zh) +
+                            new Date().toISOString().split('T')[0],
+            json_metadata:  options.json_metadata,
+            body:           txt.toString()
+                               .replace(/\$LIMIT\.en/g, options.limit.en)
+                               .replace(/\$LIMIT\.zh/g, options.limit.zh)
+                               .replace('$TABLE_VALUES', str)
         }; // var blog = { ... };
-        // TODO: 2 prepre the blog
-        blog.body = txt.toString().replace('$TITLE', data.title);
-
-
-
-
-
-        console.log(new Date().toISOString(), 'Blogger1', 'blog ready');
+        console.log(new Date().toISOString(), 'bloggerPromisingCC', 'blog ready');
 
         // Vote and save the blog
         publishAndSave(options, blog, callback);
@@ -132,7 +145,8 @@ var prepareBlog = function(options, data, callback) {
  */
 var publishAndSave = function(options, blog, callback) {
     // Publish
-    var permlink = options.author.name + '-cn-the-title-' +
+    var permlink = options.author.name +
+                   '-cn-price-of-the-most-promising-cryptocurrencies-' +
                    new Date().toISOString().split('T')[0];
 
     setTimeout(function() {
@@ -142,10 +156,11 @@ var publishAndSave = function(options, blog, callback) {
     //     if (err) {
     //         throw err;
     //     } // if (err)
-    console.log(new Date().toISOString(), 'Blogger1', 'blog published');
+    console.log(new Date().toISOString(), 'bloggerPromisingCC', 'blog published');
 
         // Published, now save it to database
-        options.db.all(`SELECT permlink FROM blogs WHERE permlink=?`, [permlink],
+        options.db.all(`SELECT permlink FROM BloggerPromisingCC WHERE permlink=?`,
+                       [permlink],
                        function(err, rows) {
             if (err) {
               throw err;
@@ -153,10 +168,12 @@ var publishAndSave = function(options, blog, callback) {
 
             // Determine whether insert new or update old
             var sql = (rows.length === 0) ?
-                `INSERT INTO blogs(created, author, title, permlink, tags, body)
+                `INSERT INTO BloggerPromisingCC(created, author, title, permlink,
+                                                tags, body)
                              VALUES(?, ?, ?, ?, ?, ?)` :
-                `UPDATE blogs SET created=?, author=?, title=?, permlink=?,
-                                  tags=?, body=? WHERE permlink=?`
+                `UPDATE BloggerPromisingCC SET created=?, author=?, title=?,
+                                               permlink=?, tags=?, body=?
+                                           WHERE permlink=?`
             var values = [
                 new Date().getTime(),
                 blog.author,
@@ -167,7 +184,7 @@ var publishAndSave = function(options, blog, callback) {
             ]; // values = [ ... ];
             if (rows.length > 0) {
                 values.push(permlink);
-                console.warn(new Date().toISOString(), 'Blogger1',
+                console.warn(new Date().toISOString(), 'bloggerPromisingCC',
                             'blog already published; now updated');
             } // if (rows.length > 0)
 
@@ -177,7 +194,7 @@ var publishAndSave = function(options, blog, callback) {
                     throw err;
                 } // if (err)
                 options.db.close();
-                console.log(new Date().toISOString(), 'Blogger1', 'blog saved');
+                console.log(new Date().toISOString(), 'bloggerPromisingCC', 'blog saved');
 
                 // All done, return
                 if (callback) {
