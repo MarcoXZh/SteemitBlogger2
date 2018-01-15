@@ -149,13 +149,12 @@ var publishAndSave = function(options, blog, callback) {
                    '-cn-price-of-the-most-promising-cryptocurrencies-' +
                    new Date().toISOString().split('T')[0];
 
-    setTimeout(function() {
-    // steem.broadcast.comment(options.author.posting_key, '', 'cn', blog.author,
-    //                         permlink, blog.title, blog.body, blog.json_metadata,
-    //                         function(err, re) {
-    //     if (err) {
-    //         throw err;
-    //     } // if (err)
+    steem.broadcast.comment(options.author.posting_key, '', 'cn', blog.author,
+                            permlink, blog.title, blog.body, blog.json_metadata,
+                            function(err, re) {
+        if (err) {
+            throw err;
+        } // if (err)
     console.log(new Date().toISOString(), 'bloggerPromisingCC', 'blog published');
 
         // Published, now save it to database
@@ -203,6 +202,5 @@ var publishAndSave = function(options, blog, callback) {
 
             }); // options.db.run(sql, values, function(err) { ... });
         }); // options.db.all( ... });
-    // }); // steem.broadcast.comment( ... );
-    }, 1000);
+    }); // steem.broadcast.comment( ... );
 }; // var publishAndSave = function(options, blog, callback) { ... };
