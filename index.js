@@ -28,22 +28,6 @@ var cronBloggerPromisingCC = '30 05 00 * * *';
 var cronBloggerCCTrading = '30 10 00 * * *';
 
 
-
-
-
-
-var now = new Date(new Date().getTime() + 1000);
-var cronBloggerPromisingCC = now.getUTCSeconds() + ' ' + now.getUTCMinutes() + ' ' +
-                             now.getUTCHours() + ' * * * ';
-var now = new Date(new Date().getTime() + 5000);
-var cronBloggerCCTrading = now.getUTCSeconds() + ' ' + now.getUTCMinutes() + ' ' +
-                             now.getUTCHours() + ' * * * ';
-
-
-
-
-
-
 // The BloggerPromisingCC job
 console.log(new Date().toISOString(),
             'BloggerPromisingCC', 'process scheduled:', cronBloggerPromisingCC);
@@ -54,12 +38,12 @@ new CronJob(cronBloggerPromisingCC, function() {
     }); // BloggerPromisingCC(options, function(blog) { ... });
 }, null, true, 'UTC'); // new CronJob( ... );
 
-// The BloggerCCTrading job
-console.log(new Date().toISOString(),
-            'BloggerCCTrading', 'process scheduled:', cronBloggerCCTrading);
-new CronJob(cronBloggerCCTrading, function() {
-        console.log(new Date().toISOString(), 'BloggerCCTrading', 'process started');
-        BloggerCCTrading(options, function(blog) {
-        console.log(new Date().toISOString(), 'BloggerCCTrading', 'process executed');
-    }); // BloggerCCTrading(options, function(blog) { ... });
-}, null, true, 'UTC'); // new CronJob( ... );
+// // The BloggerCCTrading job
+// console.log(new Date().toISOString(),
+//             'BloggerCCTrading', 'process scheduled:', cronBloggerCCTrading);
+// new CronJob(cronBloggerCCTrading, function() {
+//         console.log(new Date().toISOString(), 'BloggerCCTrading', 'process started');
+//         BloggerCCTrading(options, function(blog) {
+//         console.log(new Date().toISOString(), 'BloggerCCTrading', 'process executed');
+//     }); // BloggerCCTrading(options, function(blog) { ... });
+// }, null, true, 'UTC'); // new CronJob( ... );
