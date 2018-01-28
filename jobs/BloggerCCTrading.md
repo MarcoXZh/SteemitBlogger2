@@ -8,7 +8,7 @@
 Total trading results: 交易总体记录：
 
 | Starting date               | $START.en |
-|----------------------------:|----------:|
+|:---------------------------:|:---------:|
 | 开始日期                    | $START.zh |
 | Recording date              | $RECORD.en |
 | 记录日期                    | $RECORD.zh |

@@ -1,7 +1,7 @@
 /**
  * Main entry of the steemit blog autobot
  * @author  MarcoXZh3
- * @version 0.0.5
+ * @version 0.1.0
  */
 module.exports.name = 'SteemitBlogger';
 
@@ -23,9 +23,21 @@ steem.api.setOptions({ url:'https://api.steemit.com' });
 console.log(new Date().toISOString(), 'Steemit Blogger started');
 
 // The BloggerPromisingCC schedule -- run everyday at 00:05:30 AM (UTC)
-var cronBloggerPromisingCC = '30 05 00 * * *';
+var cronBloggerPromisingCC = '30 00 00 * * *';
 // The BloggerCCTrading schedule -- run everyday at 00:10:30 AM (UTC)
 var cronBloggerCCTrading = '30 10 00 * * *';
+
+// Start right away
+setTimeout(function() {
+    BloggerPromisingCC(options, function(blog) {
+        console.log(new Date().toISOString(), 'BloggerPromisingCC', 'process executed');
+    }); // BloggerPromisingCC(options, function(blog) { ... });
+}, 1000);
+setTimeout(function() {
+    BloggerCCTrading(options, function(blog) {
+        console.log(new Date().toISOString(), 'BloggerCCTrading', 'process executed');
+    }); // BloggerCCTrading(options, function(blog) { ... });
+}, 601000);
 
 
 // The BloggerPromisingCC job
@@ -38,12 +50,12 @@ new CronJob(cronBloggerPromisingCC, function() {
     }); // BloggerPromisingCC(options, function(blog) { ... });
 }, null, true, 'UTC'); // new CronJob( ... );
 
-// // The BloggerCCTrading job
-// console.log(new Date().toISOString(),
-//             'BloggerCCTrading', 'process scheduled:', cronBloggerCCTrading);
-// new CronJob(cronBloggerCCTrading, function() {
-//         console.log(new Date().toISOString(), 'BloggerCCTrading', 'process started');
-//         BloggerCCTrading(options, function(blog) {
-//         console.log(new Date().toISOString(), 'BloggerCCTrading', 'process executed');
-//     }); // BloggerCCTrading(options, function(blog) { ... });
-// }, null, true, 'UTC'); // new CronJob( ... );
+// The BloggerCCTrading job
+console.log(new Date().toISOString(),
+            'BloggerCCTrading', 'process scheduled:', cronBloggerCCTrading);
+new CronJob(cronBloggerCCTrading, function() {
+        console.log(new Date().toISOString(), 'BloggerCCTrading', 'process started');
+        BloggerCCTrading(options, function(blog) {
+        console.log(new Date().toISOString(), 'BloggerCCTrading', 'process executed');
+    }); // BloggerCCTrading(options, function(blog) { ... });
+}, null, true, 'UTC'); // new CronJob( ... );

@@ -82,19 +82,44 @@ var retrieve = function(options, $, callback) {
     var prices    = $('.price')                  .map( (i,e)=>e.children[0].data );
     var oneDay    = $('.percent-24h')            .map( (i,e)=>e.children[0].data );
     var sevenDays = $('.percent-7d')             .map( (i,e)=>e.children[0].data );
-    var data = [];
-    for (var i = 0; i < options.limit.value; i++) {
-        data.push([
-            i + 1,          // index
-            names[i],       // name
-            prices[i],      // price,
-            oneDay[i],      // oneDay
-            sevenDays[i]    // sevenDays
-        ]); // data.push({ ... });
-    } // for (var i = 0; i < options.limit.value; i++)
 
-    // Prepare the blog text using the data
-    prepareBlog(options, data, callback);
+    fs.readFile(__filename.replace(/\.js$/g, '.csv'),
+                { encoding:'utf8', flag:'r'}, function(err, txt) {
+        if (err) {
+            throw err;
+        } // if (err)
+
+        var cols = [];
+        txt.split('\n').forEach(function(e) {
+            var cols0 = e.split(',').map( (c)=>c.trim());
+            if (/\d{1,2}\/\d{1,2}\/\d{4}/g.test(cols0[0])) {
+                var oldTime = new Date(cols[0]).getTime();
+                var newTime = new Date(cols0[0]).getTime();
+                if (!cols[0] || newTime > oldTime) {
+                    cols = cols0;
+                    // console.log(cols);
+                } // if (!cols[0] || newTime > oldTime)
+            } // if (/\d{1,2}\/\d{1,2}\/\d{4}/g.test(cols0[0]))
+        }); // txt.split('\n').forEach(function(e) { ... });
+        cols = cols.slice(1);
+
+        var data = [];
+        var idx = 0;
+        for (var i = 0; i < names.length; i++) {
+            if (cols.indexOf(names[i]) >= 0) {
+                data.push([
+                    ++ idx,         // index
+                    names[i],       // name
+                    prices[i],      // price,
+                    oneDay[i],      // oneDay
+                    sevenDays[i]    // sevenDays
+                ]); // data.push({ ... });
+            } // if (cols.indexOf(names[i]) >= 0)
+        } // for (var i = 0; i < names.length; i++)
+
+        // Prepare the blog text using the data
+        prepareBlog(options, data, callback);
+    }); // fs.readFile(__filename.replace(/\.js$/g, '.csv'), ... );
 }; // var retrieve = function(options, $, callback) { ... };
 
 
@@ -129,7 +154,6 @@ var prepareBlog = function(options, data, callback) {
                                .replace(/\$LIMIT\.zh/g, options.limit.zh)
                                .replace('$TABLE_VALUES', str)
         }; // var blog = { ... };
-        console.log(new Date().toISOString(), 'bloggerPromisingCC', 'blog ready');
 
         // Vote and save the blog
         publishAndSave(options, blog, callback);
@@ -155,7 +179,7 @@ var publishAndSave = function(options, blog, callback) {
         if (err) {
             throw err;
         } // if (err)
-    console.log(new Date().toISOString(), 'bloggerPromisingCC', 'blog published');
+        console.log(new Date().toISOString(), 'bloggerPromisingCC', 'blog published');
 
         // Published, now save it to database
         options.db.all(`SELECT permlink FROM BloggerPromisingCC WHERE permlink=?`,
